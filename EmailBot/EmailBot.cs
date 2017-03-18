@@ -42,12 +42,15 @@ namespace EmailBot
 
             var configData = new StreamReader(filePath);
 
-            var email = configData.ReadLine();
-            var password = configData.ReadLine();
+            var email = configData.ReadLine().Trim().Replace("Email:", "");
+            var password = configData.ReadLine().Trim().Replace("Password:", "");
+
+            var emailList = EmailData.Select(x => x.Split(',')[2]).ToList();
+            var emails = string.Join(",", emailList);
 
             var fromAddress = new MailAddress(email, "noreply@gmail.com");
-            var toAddress = new MailAddress(, "Steven Fry");
-            const string fromPassword = "y9-+ncAtVE=!!=*tiv+X";
+            var toAddress = new MailAddress(emails, "Steven Fry");
+            const string fromPassword = password;
             const string subject = "Subject";
             const string body = "Body";
 
