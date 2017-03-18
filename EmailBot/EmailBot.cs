@@ -34,9 +34,17 @@ namespace EmailBot
         {
             var filePath = GetDocumentFilePath("config.txt");
 
-            if(filePath == null || filePath.Length == 0)
+            if (filePath == null || filePath.Length == 0)
             {
                 Console.WriteLine("config.txt not found! Call Zak :)");
+                return;
+            }
+
+
+            var bodyFilePath = GetDocumentFilePath("body.txt");
+            if (bodyFilePath == null || bodyFilePath.Length == 0)
+            {
+                Console.WriteLine("body.txt not found! Call Zak :)");
                 return;
             }
 
@@ -45,14 +53,13 @@ namespace EmailBot
             var email = configData.ReadLine().Trim().Replace("Email:", "");
             var password = configData.ReadLine().Trim().Replace("Password:", "");
 
-            var emailList = EmailData.Select(x => x.Split(',')[2]).ToList();
-            var emails = string.Join(",", emailList);
+            var emailList = EmailData.Select(x => x.Split(',')[1]).ToList();
+            //var emails = string.Join(",", emailList);
 
-            var fromAddress = new MailAddress(email, "noreply@gmail.com");
-            var toAddress = new MailAddress(emails, "Steven Fry");
-            const string fromPassword = password;
-            const string subject = "Subject";
-            const string body = "Body";
+
+            string fromPassword = password;
+            //const string subject = "Subject";
+            //const string body = "Body";
 
             var smtp = new SmtpClient
             {
@@ -61,26 +68,53 @@ namespace EmailBot
                 EnableSsl = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
             };
-            using (var message = new MailMessage(fromAddress, toAddress)
+            var fromAddress = new MailAddress(email, "noreply@gmail.com");
+
+            //foreach (var address in emailList)
+            //{
+            //    var toAddress = new MailAddress(address, "Steven Fry");
+            //    smtp.Credentials = new NetworkCredential(fromAddress.Address, fromPassword);
+
+            //    using (var message = new MailMessage(fromAddress, toAddress)
+            //    {
+            //        Subject = "It's time to order CPAP supplies!",
+            //        Body = GetEmailBody(bodyFilePath, EmailData)
+            //    })
+            //    {
+            //        smtp.Send(message);
+            //    }
+            //}
+
+            for(int i = 0; i < emailList.Count; i++)
             {
-                Subject = subject,
-                Body = body
-            })
-            {
-                smtp.Send(message);
+                var toAddress = new MailAddress(emailList[i], "Steven Fry");
+                smtp.Credentials = new NetworkCredential(fromAddress.Address, fromPassword);
+
+                using (var message = new MailMessage(fromAddress, toAddress)
+                {
+                    Subject = "It's time to order CPAP supplies!",
+                    Body = GetEmailBody(bodyFilePath, EmailData)
+                })
+                {
+                    smtp.Send(message);
+                }
             }
 
         }
 
+        static string GetEmailBody(string filePath, List<string> EmailData)
+        {
+
+        }
+        
 
         static List<string> GetToEmailList(List<string> workbook)
         {
             // I really hope there's a better way to do something like this besides repeating it
-            var toEmailList = workbook.Where(x => (DateTime.Now - DateTime.Parse(x.Split(',').ToList()[2])).Days == 0 || (DateTime.Now - DateTime.Parse(x.Split(',').ToList()[2])).Days == 60)
+            var toEmailList = workbook.Where(x => /*(DateTime.Now - DateTime.Parse(x.Split(',').ToList()[2])).Days == 0 ||*/ (DateTime.Now - DateTime.Parse(x.Split(',').ToList()[2])).Days == 60)
                                .Select(x => x).ToList();
-            
+
             return toEmailList;
 
         }
