@@ -54,13 +54,9 @@ namespace EmailBot
             var password = configData.ReadLine().Trim().Replace("Password:", "");
 
             var emailList = EmailData.Select(x => x.Split(',')[1]).ToList();
-            //var emails = string.Join(",", emailList);
 
 
             string fromPassword = password;
-            //const string subject = "Subject";
-            //const string body = "Body";
-
             var smtp = new SmtpClient
             {
                 Host = "smtp.gmail.com",
@@ -68,23 +64,9 @@ namespace EmailBot
                 EnableSsl = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 UseDefaultCredentials = false,
+                
             };
             var fromAddress = new MailAddress(email, "noreply@gmail.com");
-
-            //foreach (var address in emailList)
-            //{
-            //    var toAddress = new MailAddress(address, "Steven Fry");
-            //    smtp.Credentials = new NetworkCredential(fromAddress.Address, fromPassword);
-
-            //    using (var message = new MailMessage(fromAddress, toAddress)
-            //    {
-            //        Subject = "It's time to order CPAP supplies!",
-            //        Body = GetEmailBody(bodyFilePath, EmailData)
-            //    })
-            //    {
-            //        smtp.Send(message);
-            //    }
-            //}
 
             for(int i = 0; i < emailList.Count; i++)
             {
@@ -94,9 +76,11 @@ namespace EmailBot
                 using (var message = new MailMessage(fromAddress, toAddress)
                 {
                     Subject = "It's time to order CPAP supplies!",
-                    Body = GetEmailBody(bodyFilePath, EmailData)
+                    Body = GetEmailBody(bodyFilePath, EmailData),
+                    IsBodyHtml = true,
                 })
                 {
+
                     smtp.Send(message);
                 }
             }
@@ -105,7 +89,11 @@ namespace EmailBot
 
         static string GetEmailBody(string filePath, List<string> EmailData)
         {
+            var body = File.ReadAllText(filePath);
 
+            // Add some replaces in here
+
+            return body;
         }
         
 
